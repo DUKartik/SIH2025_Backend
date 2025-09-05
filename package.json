@@ -4,7 +4,7 @@
   "description": "Digital Platform for Centralized Alumni Data Management and Engagement",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules  src/index.js"
   },
   "repository": {
     "type": "git",

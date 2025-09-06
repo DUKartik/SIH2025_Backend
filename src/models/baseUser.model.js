@@ -61,8 +61,7 @@ userSchema.methods.generateAccessToken = function(){
       {
             _id:this._id,
             email:this.email,
-            username:this.username,
-            fullName: this.fullName,
+            role:this.role
         },
 
         process.env.ACCESS_TOKEN_SECRET,
@@ -78,8 +77,7 @@ userSchema.methods.generateRefreshToken = function(){
       {
         _id:this._id,
         email:this.email,
-        username:this.username,
-        fullName: this.fullName,
+        role:this.role
       },
 
       process.env.REFRESH_TOKEN_SECRET,

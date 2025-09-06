@@ -12,6 +12,7 @@ app.use(cookieParser()); // use to store read cookie on user browser
 
 //routes import
 import adminRouter from "./routes/admin.route.js"
+import superAdminRouter from "./routes/superAdmin.route.js"
 import studentRouter from "./routes/student.route.js"
 import baseUserRouter from "./routes/baseUser.route.js"
 import alumniRouter from "./routes/alumni.route.js"
@@ -20,6 +21,7 @@ import alumniRouter from "./routes/alumni.route.js"
 app.use("/api/v1/baseUsers",baseUserRouter);
 app.use("/api/v1/students",studentRouter);
 app.use("/api/v1/admins",adminRouter);
+app.use("/api/v1/superAdmin",superAdminRouter);
 app.use("/api/v1/alumni",alumniRouter);
 
 export {app};

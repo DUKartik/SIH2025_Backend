@@ -19,13 +19,13 @@ const generateAccessAndRefreshToken=async(_id,role)=>
 }
 
 const Login = asyncHandler(async (req,res)=>{
-    const {email,password_hash,role} = req.body;
+    const {email,password,role} = req.body;
 
-    if(!email || !password_hash || !role){
-        throw new ApiError(402,"All fields are complusory");
+    if(!email || !password || !role){
+        throw new ApiError(401,"All fields are complusory");
     }
 
-    if(role !="Admin" && role !="SuperAdmin" && role !="Student"){
+    if(role !="Admin" && role !="SuperAdmin" && role !="Student" && role !="Alumni"){
         throw new ApiError(404,"Invalid role choosen");
     }
 
@@ -33,9 +33,9 @@ const Login = asyncHandler(async (req,res)=>{
     if(!user){
         throw new ApiError(404,"user not found with this email");
     }
-    const isPasswordValid= await user.isPasswordCorrect(password_hash);
+    const isPasswordValid= await user.isPasswordCorrect(password);
     if(!isPasswordValid){
-        throw new ApiError(402,"invalid Credentials");
+        throw new ApiError(401,"invalid Credentials");
     }
 
     const {refreshToken,accessToken} = await generateAccessAndRefreshToken(user._id,role);

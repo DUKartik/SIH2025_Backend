@@ -1,4 +1,5 @@
 import {User} from "./baseUser.model.js"
+import mongoose from "mongoose";
 
 const AdminSchema = new mongoose.Schema({
   permissions: {

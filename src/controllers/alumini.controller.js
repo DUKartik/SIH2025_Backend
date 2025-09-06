@@ -2,6 +2,7 @@ import { Alumni } from "../models/alumni.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const registerAlumni = asyncHandler(async(req,res)=>{
     const {degree,batch_year,department,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -12,6 +13,10 @@ const registerAlumni = asyncHandler(async(req,res)=>{
         throw new ApiError(400, "kindly fill the mandatory field");
     }
 
+    const checkUnique = await User.findOne({email});
+    if(checkUnique){
+        throw new ApiError(404,"User Already exist with this email");
+    }
     const avatarLocalPath = req.file?.path;
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file missing");

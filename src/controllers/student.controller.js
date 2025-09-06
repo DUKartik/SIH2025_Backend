@@ -1,8 +1,9 @@
 import { Student } from "../models/student.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { college_Domain } from "../../constants.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { college_Domain } from "../constants.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const registerStudent = asyncHandler(async(req,res)=>{
     const {college_roll,batch_year,course,branch,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -13,12 +14,17 @@ const registerStudent = asyncHandler(async(req,res)=>{
         throw new ApiError(400, "kindly fill the mandatory field");
     }
     
-    const emailDomain = email.include("@") ? email.split("@")[1] : null;
+    const emailDomain = email.includes("@") ? email.split("@")[1] : null;
 
     if(emailDomain==null || emailDomain!=college_Domain){
         throw new ApiError(404,"invalid Email, kindly Enter your college mail");
     }
 
+    const checkUnique = await User.findOne({email});
+    if(checkUnique){
+        throw new ApiError(404,"User Already exist with this email");
+    }
+    
     const avatarLocalPath = req.file?.path;
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file missing");

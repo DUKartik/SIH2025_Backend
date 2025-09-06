@@ -44,14 +44,14 @@ const BaseUserSchema = new mongoose.Schema(
 
 
 BaseUserSchema.pre("save", async function (next) {
-  if(!this.isModified("password")) return next();
+  if(!this.isModified("password_hash")) return next();
 
-  this.password = await bcrypt.hash(this.password, 10)
+  this.password_hash = await bcrypt.hash(this.password_hash, 10)
     next()
 })
 
-BaseUserSchema.methods.isPasswordCorrect = async function (password){
-  return await bcrypt.compare(password,this.password);
+BaseUserSchema.methods.isPasswordCorrect = async function (password_hash){
+  return await bcrypt.compare(password,this.password_hash);
 }
 
 BaseUserSchema.methods.generateAccessToken = function(){

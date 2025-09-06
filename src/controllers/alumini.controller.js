@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { User } from "../models/baseUser.model.js";
 
 const registerAlumni = asyncHandler(async(req,res)=>{
     const {degree,batch_year,department,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -42,10 +43,14 @@ const registerAlumni = asyncHandler(async(req,res)=>{
         }
     )
 
+    const alumniObj = alumni.toObject();
+    delete alumniObj.password_hash;
+    delete alumniObj.refreshToken;
+
     return res
     .status(200)
     .json(
-        new ApiResponse(200,alumni,"Alumni Registered Successfully")
+        new ApiResponse(200,alumniObj,"Alumni Registered Successfully")
     )
 })
 

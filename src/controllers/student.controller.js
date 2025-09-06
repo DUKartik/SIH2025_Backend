@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { college_Domain } from "../constants.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { User } from "../models/baseUser.model.js";
 
 const registerStudent = asyncHandler(async(req,res)=>{
     const {college_roll,batch_year,course,branch,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -50,11 +51,14 @@ const registerStudent = asyncHandler(async(req,res)=>{
             password_hash
         }
     )
-    
+
+    const studentObj = student.toObject();
+    delete studentObj.password_hash;
+    delete studentObj.refreshToken;
     return res
     .status(200)
     .json(
-        new ApiResponse(200,student,"Student Registered Successfully")
+        new ApiResponse(200,studentObj,"Student Registered Successfully")
     )
 })
 

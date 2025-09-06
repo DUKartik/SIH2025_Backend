@@ -1,4 +1,5 @@
 import {User} from "./baseUser.model.js"
+import mongoose from "mongoose";
 
 const AlumniSchema = new mongoose.Schema({
   batch_year: { 

@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { User } from "../models/baseUser.model.js";
 
 const registerAdmin = asyncHandler(async(req,res)=>{
     const {first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -33,7 +34,7 @@ const registerAdmin = asyncHandler(async(req,res)=>{
         throw new ApiError(400,"Something went wrong while uploading avatar on cloudinary");
     }
 
-    const alumni = await Admin.create(
+    const admin = await Admin.create(
         {
             first_name,
             middle_name,
@@ -44,10 +45,14 @@ const registerAdmin = asyncHandler(async(req,res)=>{
         }
     )
 
+    const adminObj = admin.toObject();
+    delete adminObj.password_hash;
+    delete adminObj.refreshToken;
+
     return res
     .status(200)
     .json(
-        new ApiResponse(200,alumni,"Alumni Registered Successfully")
+        new ApiResponse(200,adminObj,"Alumni Registered Successfully")
     )
 })
 

@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { } from "../controllers/admin.controller.js";
+import { registerAdmin } from "../controllers/superAdmin.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
+router.route("/register-Admin").post(verifyJWT,upload.single("avatar"),registerAdmin);
 
 export default router;

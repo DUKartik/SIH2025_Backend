@@ -1,24 +1,17 @@
-import { ApiError } from "../utils/ApiError.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import jwt from "jsonwebtoken"
-import {User} from "../models/baseUser.model.js"
+import multer from "multer";
 
-export const verifyJWT= asyncHandler(async(req,res,next)=>{
-    try {
-        const token=req.cookies?.accessToken;
-        if(!token){
-            throw new ApiError(401,"Unauthorized request");
-        }
-        const decodedToken= jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
-    
-        const user=await User.findById(decodedToken?._id).select("-password -refreshToken");
-        if(!user){
-            throw new ApiError(401,"Invalid Access Token");
-        }
-    
-        req.user=user;
-        next();
-    } catch (error) {
-        throw new ApiError(401,error?.message ||"Invalid access token");
-    }
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/temp')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  }
 })
+
+export const upload = multer(
+  { storage: storage, 
+    limits: {
+      fileSize: 100*1024*1024,
+    }
+  })

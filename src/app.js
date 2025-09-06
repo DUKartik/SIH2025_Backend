@@ -11,10 +11,10 @@ app.use(express.static("public")); // whichh could be acess by anyone
 app.use(cookieParser()); // use to store read cookie on user browser
 
 //routes import
-import adminRouter from "./routes/admin.controller.js"
-import studentRouter from "./routes/student.controller.js"
+import adminRouter from "./routes/admin.route.js"
+import studentRouter from "./routes/student.route.js"
 import baseUserRouter from "./routes/baseUser.route.js"
-import alumniRouter from "./routes/alumni.controller.js"
+import alumniRouter from "./routes/alumni.route.js"
 //routes decleration
 
 app.use("/api/v1/baseUsers",baseUserRouter);

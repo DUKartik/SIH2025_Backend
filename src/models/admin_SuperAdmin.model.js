@@ -64,7 +64,7 @@ const SuperAdminSchema = new mongoose.Schema({
   },
 });
 
-const SuperAdmin = User.discriminator("Super-admin", SuperAdminSchema);
+const SuperAdmin = User.discriminator("SuperAdmin", SuperAdminSchema);
 
 export {
     Admin,

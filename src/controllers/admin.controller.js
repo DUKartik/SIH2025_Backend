@@ -10,10 +10,6 @@ const VerifyAlumni = asyncHandler(async(req,res)=>{
     if(!alumni_id){
         throw new ApiError(500,"alumni_id not recieved");
     }
-    const user =req.user;
-    if(user.role!="Admin"){
-        throw new ApiError(401,"unauthorized Access");
-    }
     const alumni = await Alumni.findByIdAndUpdate(
         alumni_id,
         {

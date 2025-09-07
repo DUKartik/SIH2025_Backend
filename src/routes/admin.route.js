@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { } from "../controllers/admin.controller.js";
+import { VerifyAlumni,
+        getPendingApprovalAlumni, } from "../controllers/admin.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
+router.route("/verify-Alumni").post(verifyJWT,VerifyAlumni);
+router.route("/pending-approvalAlumni").get(verifyJWT,getPendingApprovalAlumni);
 
 export default router;

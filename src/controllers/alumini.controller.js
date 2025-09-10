@@ -12,8 +12,7 @@ const registerAlumni = asyncHandler(async(req,res)=>{
     
     if (Object.values(requiredFields).some(value => !value)) {
         throw new ApiError(400, "kindly fill the mandatory field");
-    }
-
+    }       
     const checkUnique = await User.findOne({email});
     if(checkUnique){
         throw new ApiError(404,"User Already exist with this email");

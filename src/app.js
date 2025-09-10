@@ -19,8 +19,11 @@ import superAdminRouter from "./routes/superAdmin.route.js"
 import studentRouter from "./routes/student.route.js"
 import baseUserRouter from "./routes/baseUser.route.js"
 import alumniRouter from "./routes/alumni.route.js"
+import otpRouter from "./routes/otp.route.js";
 //routes decleration
 
+
+app.use("/api/v1/otp", otpRouter);
 app.use("/api/v1/baseUsers",baseUserRouter);
 app.use("/api/v1/students",studentRouter);
 app.use("/api/v1/admins",adminRouter);

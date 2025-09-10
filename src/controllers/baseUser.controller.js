@@ -50,8 +50,8 @@ const Login = asyncHandler(async (req,res)=>{
 
     const option={
         httpOnly:true,
-        secure:true, // set it to true after creating frontend
-        sameSite: "none"
+        secure:false, // set it to true after creating frontend
+        // sameSite: "none"
     }
 
     return res

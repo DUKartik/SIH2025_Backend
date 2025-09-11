@@ -39,7 +39,8 @@ const getPendingApprovalAlumni = asyncHandler(async(req,res)=>{
         {
             $facet: {
                 data: [
-                    { $sort: { createdAt: -1 } }
+                    { $sort: { createdAt: -1 } },
+                    { $project: { password_hash: 0, refreshToken: 0 } }
                 ],
                 metadata: [
                     { $count: 'totalPending' }
@@ -59,6 +60,7 @@ const getPendingApprovalAlumni = asyncHandler(async(req,res)=>{
         new ApiResponse(200,PendingApproval,"list of all pending alumni fetched successfully")
     )
 })
+
 export{
     VerifyAlumni,
     getPendingApprovalAlumni,

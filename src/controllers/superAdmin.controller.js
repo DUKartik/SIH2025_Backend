@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/baseUser.model.js";
+import { default_avatar_url } from "../constants.js";
 
 const registerAdmin = asyncHandler(async(req,res)=>{
     const {first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -24,22 +25,21 @@ const registerAdmin = asyncHandler(async(req,res)=>{
     }
     
     const avatarLocalPath = req.file?.path;
-    if(!avatarLocalPath){
-        throw new ApiError(400,"Avatar file missing");
+    if(avatarLocalPath){
+        const avatar =await uploadOnCloudinary(avatarLocalPath);
+        if(!avatar.url){
+            throw new ApiError(400,"Something went wrong while uploading avatar on cloudinary");
+        }
     }
 
-    const avatar =await uploadOnCloudinary(avatarLocalPath);
 
-    if(!avatar.url){
-        throw new ApiError(400,"Something went wrong while uploading avatar on cloudinary");
-    }
 
     const admin = await Admin.create(
         {
             first_name,
             middle_name,
             last_name,
-            avatar:avatar?.url,
+            avatar:avatar?.url || default_avatar_url,
             email,
             password_hash
         }

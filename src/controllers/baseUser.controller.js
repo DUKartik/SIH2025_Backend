@@ -52,8 +52,8 @@ const Login = asyncHandler(async (req,res)=>{
 
     const option={
         httpOnly:true,
-        secure:false, // set it to false when testing with postman
-        // sameSite: "none"      // comment this line when testing with postman
+        secure:false, // set it to true after creating frontend
+        // sameSite: "none"
     }
 
     return res

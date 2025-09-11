@@ -29,6 +29,20 @@ const VerifyAlumni = asyncHandler(async(req,res)=>{
 
 })
 
+const denyAlumni = asyncHandler(async(req,res)=>{
+    const {alumni_id} = req.body || {};
+     if(!alumni_id){
+        throw new ApiError(500,"alumni_id not recieved");
+    }
+    await Alumni.deleteOne({_id:alumni_id});
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,{},"Alumni Disproved successfully")
+    )
+})
+
 const getPendingApprovalAlumni = asyncHandler(async(req,res)=>{
     const PendingApproval = await Alumni.aggregate([
         {
@@ -64,4 +78,5 @@ const getPendingApprovalAlumni = asyncHandler(async(req,res)=>{
 export{
     VerifyAlumni,
     getPendingApprovalAlumni,
+    denyAlumni,
 }

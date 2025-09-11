@@ -5,6 +5,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { college_Domain } from "../constants.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/baseUser.model.js";
+import { default_avatar_url } from "../constants.js";
+
 
 const registerStudent = asyncHandler(async(req,res)=>{
     const {college_roll,batch_year,course,branch,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -27,14 +29,12 @@ const registerStudent = asyncHandler(async(req,res)=>{
     }
     
     const avatarLocalPath = req.file?.path;
-    if(!avatarLocalPath){
-        throw new ApiError(400,"Avatar file missing");
-    }
-
-    const avatar =await uploadOnCloudinary(avatarLocalPath);
-
-    if(!avatar.url){
-        throw new ApiError(400,"Something went wrong while uploading avatar on cloudinary");
+    let avatar;
+    if(avatarLocalPath){
+        avatar =await uploadOnCloudinary(avatarLocalPath);
+        if(!avatar?.url){
+            throw new ApiError(400,"Something went wrong while uploading avatar on cloudinary");
+        }
     }
 
     const student = await Student.create(
@@ -42,7 +42,7 @@ const registerStudent = asyncHandler(async(req,res)=>{
             first_name,
             middle_name,
             last_name,
-            avatar:avatar?.url,
+            avatar:avatar?.url || default_avatar_url,
             college_roll,
             batch_year,
             course,

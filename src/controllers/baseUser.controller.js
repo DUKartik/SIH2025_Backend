@@ -1,5 +1,5 @@
 import { User } from "../models/baseUser.model.js";
-import { Event, Event } from "../models/event.model.js";
+import { Event } from "../models/event.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -102,26 +102,26 @@ const refreshAccessToken =asyncHandler(async(req,res)=>{
                 throw new ApiError(401,"Invalid refreshToken")
             }
             
-            if(user.refreshToken !== user?.refreshToken){
+            if(IncomingRefreshToken !== user?.refreshToken){
                 throw new ApiError(401,"refresh Token is expired or used");
             }
             
-            const {accessToken,newRefreshToken} =await generateAccessAndRefreshToken(user._id)
+            const {accessToken,newRefreshToken} =await generateAccessAndRefreshToken(user._id,user.role)
             const option ={
                 httpOnly:true,
-                secure:true
+                secure:false
             }
             return res
             .status(200)
-            .cookie("accessToken",newRefreshToken,option)
-            .cookie("refreshToken",accessToken,option)
+            .cookie("accessToken",accessToken,option)
+            .cookie("refreshToken",newRefreshToken,option)
             .json(
                 new ApiResponse(200,{accessToken,refreshToken:newRefreshToken},
                     "Access token refreshed successfully"
                 )
             )
     } catch (error) {
-        throw new ApiError(401);
+        throw new ApiError(401,error.message);
     }
 
 })

@@ -153,28 +153,37 @@ const getAllEvents = asyncHandler(async(req,res)=>{
 })
 
 const updateEventDetails = asyncHandler(async(req,res)=>{
+    const {eventId} = req.params;
+    const oldEvent = await Event.findById(eventId);
+    if (!oldEvent) {
+      throw new ApiError(404, "Event not found");
+    }
     const updatedEvent = await Event.findByIdAndUpdate(
-        req.params.id,
+        eventId,
         { $set: req.body },
-        { new: true, runValidators: true }
+        { new: true}
     );
 
-    if(!updatedEvent){
-        throw new ApiError(400,"Event not fond");
+    const isChanged = Object.keys(req.body).some(
+      (key) => String(oldEvent[key]) !== String(updatedEvent[key])
+    );
+
+    if (!isChanged) {
+      throw new ApiError(400, "No fields were updated");
     }
     return res
     .status(200)
     .json(
-        new ApiResponse(200,{},"event details updated")
+        new ApiResponse(200,updatedEvent,"event details updated")
     )
 })
 
 const deleteEvent = asyncHandler(async(req,res)=>{
-    const {event_id} = req.body;
-    if(!event_id){
+    const {eventId} = req.params;
+    if(!eventId){
         throw new ApiError(400,"event doesn't exist");
     }
-    await Event.deleteOne({_id:event_id});
+    await Event.deleteOne({_id:eventId});
     return res
     .status(200)
     .json(

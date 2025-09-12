@@ -20,7 +20,7 @@ router.route("/refreshAccessToken").get(verifyJWT,refreshAccessToken);
 router.route("/ChangeCurrentPassword").patch(verifyJWT,changeCurrentPassword);
 
 router.route("/getAllEvents").get(verifyJWT,getAllEvents);
-router.route("/updateEventDetails").patch(verifyJWT,authorizeRoles("Admin"),updateEventDetails);
-router.route("/deleteEvent").delete(verifyJWT,authorizeRoles("Admin"),deleteEvent);
+router.route("/updateEvent/:eventId").patch(verifyJWT,authorizeRoles("Admin"),updateEventDetails);
+router.route("/deleteEvent/:eventId").delete(verifyJWT,authorizeRoles("Admin"),deleteEvent);
 export default router;
 

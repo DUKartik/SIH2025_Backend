@@ -1,7 +1,9 @@
 import { User } from "../models/baseUser.model.js";
+import { Event, Event } from "../models/event.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { Aggregate } from "mongoose";
 import jwt from "jsonwebtoken"
 
 const generateAccessAndRefreshToken=async(_id,role)=>
@@ -153,9 +155,67 @@ const changeCurrentPassword = asyncHandler(async(req,res)=>{
 
 })
 
+const getAllEvents = asyncHandler(async(req,res)=>{
+    const { status, mode, tags, sortBy, order } = req.query;
+
+    let filter = {};
+
+    if (status) filter.status = status; 
+    if (mode) filter.mode = mode;
+    if (tags) filter.tags = { $in: tags.split(",") }; 
+
+    let sort = {};
+    if (sortBy) {
+        sort[sortBy] = order === "asc" ? 1 : -1;
+    } else {
+        sort = { createdAt: -1 };
+    }
+
+    const events = await Event.find(filter).sort(sort);
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,{events,count:events.length},"all event fetched successfully")
+    );
+})
+
+const updateEventDetails = asyncHandler(async(req,res)=>{
+    const updatedEvent = await Event.findByIdAndUpdate(
+        req.params.id,
+        { $set: req.body },
+        { new: true, runValidators: true }
+    );
+
+    if(!updatedEvent){
+        throw new ApiError(400,"Event not fond");
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,{},"event details updated")
+    )
+})
+
+const deleteEvent = asyncHandler(async(req,res)=>{
+    const {event_id} = req.body;
+    if(!event_id){
+        throw new ApiError(400,"event doesn't exist");
+    }
+    await Event.deleteOne({_id:event_id});
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,{},"deleted the event Successfully")
+    )
+})
+
 export {
     Login,
     logout,
     refreshAccessToken,
     changeCurrentPassword,
+    getAllEvents,
+    updateEventDetails,
+    deleteEvent
     };

@@ -44,6 +44,10 @@ const denyAlumni = asyncHandler(async(req,res)=>{
 })
 
 const getPendingApprovalAlumni = asyncHandler(async(req,res)=>{
+    const page = parseInt(req.query.page) || 1;   
+    const limit = parseInt(req.query.limit) || 10; 
+    const skip = (page - 1) * limit;
+    
     const PendingApproval = await Alumni.aggregate([
         {
             $match:{
@@ -54,6 +58,8 @@ const getPendingApprovalAlumni = asyncHandler(async(req,res)=>{
             $facet: {
                 data: [
                     { $sort: { createdAt: -1 } },
+                    { $skip: skip },
+                    { $limit: limit },
                     { $project: { password_hash: 0, refreshToken: 0 } }
                 ],
                 metadata: [

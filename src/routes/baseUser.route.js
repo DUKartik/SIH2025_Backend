@@ -3,9 +3,12 @@ import { Login,
         logout,
         refreshAccessToken,
         changeCurrentPassword,
+        } from "../controllers/baseUser.controller.js";
+import {
         getAllEvents,
         updateEventDetails,
-        deleteEvent} from "../controllers/baseUser.controller.js";
+        deleteEvent
+} from "../controllers/event.controller.js"
 import { verifyJWT,authorizeRoles } from "../middlewares/auth.middleware.js";
 
 const router =Router();

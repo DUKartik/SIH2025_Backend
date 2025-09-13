@@ -159,7 +159,7 @@ const deleteAccount = asyncHandler(async (req,res) =>{
         throw new ApiError(500,"user not found");
     }
 
-    await Student.deleteOne({_id:student._id});
+    await User.deleteOne({_id:user._id});
     return res
     .status(200)
     .json(

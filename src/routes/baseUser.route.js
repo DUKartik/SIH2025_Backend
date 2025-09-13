@@ -3,7 +3,6 @@ import { Login,
         logout,
         refreshAccessToken,
         changeCurrentPassword,
-        changeCurrentPassword,
         deleteAccount,
         getProfile
         } from "../controllers/baseUser.controller.js";

@@ -53,6 +53,32 @@ const registerAlumni = asyncHandler(async(req,res)=>{
     )
 })
 
+const updateAlumniProfile = asyncHandler(async (req, res) => {
+  const oldAlumni = req.user;
+  if (!oldAlumni) {
+    throw new ApiError(404, "Alumni not found");
+  }
+
+  const updatedAlumni = await Alumni.findByIdAndUpdate(
+    oldAlumni._id,
+    { $set: req.body },
+    { new: true }
+  );
+
+  const isChanged = Object.keys(req.body).some(
+    (key) => String(oldAlumni[key]) !== String(updatedAlumni[key])
+  );
+
+  if (!isChanged) {
+    throw new ApiError(400, "No fields were updated");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, updatedAlumni, "Alumni profile updated")
+  );
+});
+
 export{
     registerAlumni,
+    updateAlumniProfile
 }

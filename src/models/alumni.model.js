@@ -1,6 +1,6 @@
 import {User} from "./baseUser.model.js"
 import mongoose from "mongoose";
-
+import ExperienceSchema from "./experience.model.js";
 const AlumniSchema = new mongoose.Schema({
   batch_year: { 
     type: Number, 
@@ -18,6 +18,15 @@ const AlumniSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
+  current_position: { type: String },
+  current_company: { type: String },
+  location: { type: String },
+
+  experience: [ExperienceSchema],
+
+  achievements: [{ type: String }],
+  linkedin: { type: String },
+  portfolio: { type: String },
   optins: {
     public_listing: { type: Boolean, default: false },
     mentorship_emails: { type: Boolean, default: false },

@@ -185,12 +185,12 @@ const searchUsers = asyncHandler(async (req, res) => {
   const { role, name, batch_year, degree, department, branch, skills, location } = req.query;
 
   let Model;
-  if (role === "alumni") {
+  if (role === "Alumni") {
     Model = Alumni;
-  } else if (role === "student") {
+  } else if (role === "Student") {
     Model = Student;
   } else {
-    throw new ApiError(400, "Invalid role. Use 'alumni' or 'student'");
+    throw new ApiError(400, "Invalid role. Use 'Alumni' or 'Student'");
   }
 
   // Build search query dynamically

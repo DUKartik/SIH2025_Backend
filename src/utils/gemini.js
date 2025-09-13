@@ -4,10 +4,11 @@ import { ApiError, GoogleGenAI } from "@google/genai";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-const getResponse = async (content, maxRetries = 3, delayMs = 2000) => {
-  let attempts = 0;
+const getResponse = async (content) => {
+  const maxRetries = 3;
+  let delay = 1000; // start at 1s
 
-  while (attempts < maxRetries) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
@@ -18,8 +19,8 @@ const getResponse = async (content, maxRetries = 3, delayMs = 2000) => {
         },
       });
 
-      // Extract text safely
-      const rawText =
+      // ✅ Extract text safely
+      let rawText =
         response.candidates?.[0]?.content?.parts?.[0]?.text ||
         response.response?.candidates?.[0]?.content?.parts?.[0]?.text ||
         null;
@@ -30,13 +31,13 @@ const getResponse = async (content, maxRetries = 3, delayMs = 2000) => {
       }
 
       return rawText;
-
     } catch (error) {
-      // Retry only if the model is overloaded (503)
-      if (error?.status === 503) {
-        attempts++;
-        console.warn(`Gemini overloaded. Retry ${attempts}/${maxRetries} in ${delayMs}ms...`);
-        await new Promise(r => setTimeout(r, delayMs));
+      if (error.status === 503 && attempt < maxRetries) {
+        console.warn(
+          `Gemini overloaded (503). Retry ${attempt}/${maxRetries} in ${delay}ms...`
+        );
+        await new Promise((res) => setTimeout(res, delay));
+        delay *= 2; // exponential backoff
       } else {
         console.error("Gemini API Error:", error);
         throw error;

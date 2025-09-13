@@ -153,9 +153,37 @@ const changeCurrentPassword = asyncHandler(async(req,res)=>{
 
 })
 
+const deleteAccount = asyncHandler(async (req,res) =>{
+    const user = req.user;
+    if(!user){
+        throw new ApiError(500,"user not found");
+    }
+
+    await Student.deleteOne({_id:student._id});
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,{},"user Account deleted successfully")
+    )
+})
+
+const getProfile = asyncHandler(async(req,res)=>{
+    const user = req.user;
+    if(!user){
+        throw new ApiError(500,"user not found")
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,user,"profile fetched successfully")
+    )
+})
+
 export {
     Login,
     logout,
     refreshAccessToken,
-    changeCurrentPassword
+    changeCurrentPassword,
+    deleteAccount,
+    getProfile
     };

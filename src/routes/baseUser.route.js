@@ -4,7 +4,8 @@ import { Login,
         refreshAccessToken,
         changeCurrentPassword,
         deleteAccount,
-        getProfile
+        getProfile,
+        searchUsers
         } from "../controllers/baseUser.controller.js";
 import {
         getAllEvents,
@@ -23,6 +24,7 @@ router.route("/ChangeCurrentPassword").patch(verifyJWT,changeCurrentPassword);
 router.route("/deleteAccount").delete(verifyJWT,deleteAccount);
 router.route("/getProfile").get(verifyJWT,getProfile);
 
+router.route("/searchUser").get(verifyJWT,searchUsers);
 router.route("/getAllEvents").get(verifyJWT,getAllEvents);
 router.route("/updateEvent/:eventId").patch(verifyJWT,authorizeRoles("Admin"),updateEventDetails);
 router.route("/deleteEvent/:eventId").delete(verifyJWT,authorizeRoles("Admin"),deleteEvent);

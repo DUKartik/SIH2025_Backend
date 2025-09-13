@@ -1,4 +1,6 @@
 import { User } from "../models/baseUser.model.js";
+import { Alumni } from "../models/alumni.model.js";
+import { Student } from "../models/student.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -179,11 +181,50 @@ const getProfile = asyncHandler(async(req,res)=>{
     )
 })
 
+const searchUsers = asyncHandler(async (req, res) => {
+  const { role, name, batch_year, degree, department, branch, skills, location } = req.query;
+
+  let Model;
+  if (role === "alumni") {
+    Model = Alumni;
+  } else if (role === "student") {
+    Model = Student;
+  } else {
+    throw new ApiError(400, "Invalid role. Use 'alumni' or 'student'");
+  }
+
+  // Build search query dynamically
+  const query = {};
+
+  if (name) {
+    query.$or = [
+      { first_name: new RegExp(name, "i") },
+      { last_name: new RegExp(name, "i") },
+    ];
+  }
+
+  if (batch_year) query.batch_year = batch_year;
+  if (degree && role === "alumni") query.degree = new RegExp(degree, "i");
+  if (department && role === "alumni") query.department = new RegExp(department, "i");
+  if (branch && role === "student") query.branch = new RegExp(branch, "i");
+  if (skills && role === "student") {
+    query.skills = { $in: skills.split(",").map((s) => s.trim()) };
+  }
+  if (location && role === "alumni") query.location = new RegExp(location, "i");
+
+  const results = await Model.find(query).select("-password_hash -refreshToken");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, results, `${role} search results`));
+});
+
 export {
     Login,
     logout,
     refreshAccessToken,
     changeCurrentPassword,
     deleteAccount,
-    getProfile
+    getProfile,
+    searchUsers
     };

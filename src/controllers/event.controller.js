@@ -2,7 +2,7 @@ import { Event } from "../models/event.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary,deleteOnCloudinary } from "../utils/cloudinary.js";
 import { getResponse } from "../utils/gemini.js";
 
 const createEvent = asyncHandler(async (req, res) => {
@@ -191,6 +191,25 @@ const deleteEvent = asyncHandler(async(req,res)=>{
     )
 })
 
+const ChangeBanner = asyncHandler(async(req,res)=>{
+  const {eventId} = req.params;
+
+  const oldBannerUrl = event.banner;
+  if(oldBannerUrl){
+    await deleteOnCloudinary(oldBannerUrl);
+  }
+
+  const bannerLocalPath = req.file?.path;
+  if (!bannerLocalPath) {
+    throw new ApiError(400, "Kindly upload banner also");
+  }
+
+  const banner = await uploadOnCloudinary(bannerLocalPath);
+  if (!banner.url) {
+    throw new ApiError(500, "Something went wrong while uploading on cloudinary");
+  }
+  await Event.findByIdAndUpdate()
+})
 export {createEvent,
         getAllEvents,
         updateEventDetails,

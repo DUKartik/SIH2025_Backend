@@ -272,7 +272,7 @@ const searchUsers = asyncHandler(async (req, res) => {
   }
 
   // Execute query
-  const results = await Model.find(filter).select("-password_hash -refreshToken");
+  const results = await Model.find(filter).select("-password_hash -refreshToken -email");
 
   return res
     .status(200)

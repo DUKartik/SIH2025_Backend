@@ -15,8 +15,8 @@ router.route("/registerAlumni").post(upload.single("avatar"),registerAlumni);
 router.route("/updateprofile").get(verifyJWT,updateAlumniProfile);
 
 router.route("/addExperience").post(verifyJWT,authorizeRoles("Alumni"),addAlumniExperience);
-router.route("/addExperience").post(verifyJWT,authorizeRoles("Alumni"),getAlumniExperience);
-router.route("/addExperience").post(verifyJWT,authorizeRoles("Alumni"),updateAlumniExperience);
-router.route("/addExperience").post(verifyJWT,authorizeRoles("Alumni"),deleteAlumniExperience);
+router.route("/getExperience").post(verifyJWT,authorizeRoles("Alumni"),getAlumniExperience);
+router.route("/updateExperience").post(verifyJWT,authorizeRoles("Alumni"),updateAlumniExperience);
+router.route("/deleteExperience").post(verifyJWT,authorizeRoles("Alumni"),deleteAlumniExperience);
 
 export default router;

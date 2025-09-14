@@ -1,6 +1,7 @@
 import { User } from "../models/baseUser.model.js";
 import { Alumni } from "../models/alumni.model.js";
-import { Student } from "../models/student.model.js"
+import { Student } from "../models/student.model.js";
+import { SuperAdmin } from "../models/admin_SuperAdmin.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -33,13 +34,16 @@ const Login = asyncHandler(async (req,res)=>{
         throw new ApiError(404,"Invalid role choosen");
     }
 
-    const user = await User.findOne({email,role});
-    if(!user){
+    let user = await User.findOne({email,role});
+    if(!user && role==="Admin"){
+        user= await SuperAdmin.findOne({email,role:"SuperAdmin"});
+    }
+    else if(!user){
         throw new ApiError(404,"user not found with this email");
     }
-  if (!user.email_verified) {
-    throw new ApiError(400, "Email is not verified. Please verify OTP first.");
-  }
+    if (!user.email_verified) {
+        throw new ApiError(400, "Email is not verified. Please verify OTP first.");
+    }
     if(user.role == "Alumni" && user.approved==false){
         throw new ApiError(403,"Thankyou for registrating! Your account is now awaiting review")
     }

@@ -5,6 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken=async(_id,role)=>
 {
@@ -184,9 +185,30 @@ const getProfile = asyncHandler(async(req,res)=>{
     )
 })
 
-const searchUsers = asyncHandler(async (req, res) => {
-  const { role, name, batch_year, degree, department, branch, skills, location } = req.query;
+const getUserById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!id) throw new ApiError(400, "id required");
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid id");
 
+  const user = await User.findById(id).select("-password_hash -refreshToken");
+  if (!user) throw new ApiError(404, "User not found");
+  return res.status(200).json(new ApiResponse(200, user, "User fetched"));
+});
+
+const searchUsers = asyncHandler(async (req, res) => {
+  const { 
+    role, 
+    q, 
+    name, 
+    batch_year, 
+    degree, 
+    department, 
+    branch, 
+    skills, 
+    location 
+  } = req.query;
+
+  // Validate role
   let Model;
   if (role === "Alumni") {
     Model = Alumni;
@@ -196,26 +218,55 @@ const searchUsers = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid role. Use 'Alumni' or 'Student'");
   }
 
-  // Build search query dynamically
-  const query = {};
+  // Base filter
+  const filter = {};
 
+  // Generic search using q
+  if (q && q.trim()) {
+    const regex = new RegExp(q.trim(), "i");
+    const or = [
+      { first_name: regex },
+      { middle_name: regex },
+      { last_name: regex },
+      { email: regex },
+      { department: regex },
+      { course: regex },
+      { degree: regex },
+      { college_roll: regex },
+    ];
+    const maybeNum = Number(q);
+    if (!Number.isNaN(maybeNum)) or.push({ batch_year: maybeNum });
+    filter.$or = or;
+  }
+
+  // Structured filters
   if (name) {
-    query.$or = [
+    filter.$or = [
       { first_name: new RegExp(name, "i") },
       { last_name: new RegExp(name, "i") },
     ];
   }
 
-  if (batch_year) query.batch_year = batch_year;
-  if (degree && role === "alumni") query.degree = new RegExp(degree, "i");
-  if (department && role === "alumni") query.department = new RegExp(department, "i");
-  if (branch && role === "student") query.branch = new RegExp(branch, "i");
-  if (skills && role === "student") {
-    query.skills = { $in: skills.split(",").map((s) => s.trim()) };
+  if (batch_year) filter.batch_year = Number(batch_year);
+  if (role === "Alumni") {
+    if (degree) filter.degree = new RegExp(degree, "i");
+    if (department) filter.department = new RegExp(department, "i");
+    if (location) filter.location = new RegExp(location, "i");
   }
-  if (location && role === "alumni") query.location = new RegExp(location, "i");
+  if (role === "Student") {
+    if (branch) filter.branch = new RegExp(branch, "i");
+    if (skills) {
+      filter.skills = { $in: skills.split(",").map((s) => s.trim()) };
+    }
+  }
 
-  const results = await Model.find(query).select("-password_hash -refreshToken");
+  // Exclude self if logged in
+  if (req.user && req.user._id) {
+    filter._id = { $ne: req.user._id };
+  }
+
+  // Execute query
+  const results = await Model.find(filter).select("-password_hash -refreshToken");
 
   return res
     .status(200)
@@ -229,5 +280,6 @@ export {
     changeCurrentPassword,
     deleteAccount,
     getProfile,
-    searchUsers
+    searchUsers,
+    getUserById
     };

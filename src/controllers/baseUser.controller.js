@@ -36,7 +36,9 @@ const Login = asyncHandler(async (req,res)=>{
     if(!user){
         throw new ApiError(404,"user not found with this email");
     }
-
+  if (!user.email_verified) {
+    throw new ApiError(400, "Email is not verified. Please verify OTP first.");
+  }
     if(user.role == "Alumni" && user.approved==false){
         throw new ApiError(403,"Thankyou for registrating! Your account is now awaiting review")
     }

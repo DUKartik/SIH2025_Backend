@@ -13,7 +13,7 @@ import {
         deleteEvent
 } from "../controllers/event.controller.js"
 import { verifyJWT,authorizeRoles } from "../middlewares/auth.middleware.js";
-
+import { searchUsers, getUserById } from "../controllers/searchUser.controller.js";
 const router =Router();
 
 router.route("/login").post(Login);
@@ -28,5 +28,7 @@ router.route("/searchUser").get(verifyJWT,searchUsers);
 router.route("/getAllEvents").get(verifyJWT,getAllEvents);
 router.route("/updateEvent/:eventId").patch(verifyJWT,authorizeRoles("Admin"),updateEventDetails);
 router.route("/deleteEvent/:eventId").delete(verifyJWT,authorizeRoles("Admin"),deleteEvent);
+
+router.get("/profile/:id", verifyJWT, getUserById);
 export default router;
 

@@ -5,7 +5,8 @@ import { Login,
         changeCurrentPassword,
         deleteAccount,
         getProfile,
-        searchUsers
+        searchUsers,
+        getUserById
         } from "../controllers/baseUser.controller.js";
 import {
         getAllEvents,
@@ -13,7 +14,6 @@ import {
         deleteEvent
 } from "../controllers/event.controller.js"
 import { verifyJWT,authorizeRoles } from "../middlewares/auth.middleware.js";
-import { searchUsers, getUserById } from "../controllers/searchUser.controller.js";
 const router =Router();
 
 router.route("/login").post(Login);

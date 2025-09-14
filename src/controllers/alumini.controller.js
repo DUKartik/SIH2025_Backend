@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/baseUser.model.js";
 import { default_avatar_url } from "../constants.js";
+import { addExperience,getExperiences,deleteExperience,updateExperience } from "../utils/experience.js";
 
 const registerAlumni = asyncHandler(async(req,res)=>{
     const {degree,batch_year,department,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -77,7 +78,56 @@ const updateAlumniProfile = asyncHandler(async (req, res) => {
   );
 });
 
+const addAlumniExperience = async (req, res) => {
+  const alumni = req.user;
+  const updated = await addExperience(Alumni, alumni._id, req.body);
+  if (!updated) return res.status(404).json({ message: "Alumni not found" });
+  res
+  .status(200)
+  .json(
+    new ApiResponse(200,updated,"alumni experience added successfully")
+  );
+};
+
+const getAlumniExperience = async (req, res) => {
+  const alumni = req.user;
+  const updated = await getExperiences(Alumni, alumni._id);
+  if (!updated) return res.status(404).json({ message: "Alumni not found" });
+  res
+  .status(200)
+  .json(
+    new ApiResponse(200,updated,"alumni experience fetched successfully")
+  );
+};
+const updateAlumniExperience = async (req, res) => {
+  const alumni = req.user;
+  const {expId} = req.params;
+  const updated = await updateExperience(Alumni, alumni._id,expId,req.body);
+  if (!updated) return res.status(404).json({ message: "Alumni not found" });
+  res
+  .status(200)
+  .json(
+    new ApiResponse(200,updated,"alumni experience updated successfully")
+  );
+};
+const deleteAlumniExperience = async (req, res) => {
+  const alumni = req.user;
+  const {expId} = req.params;
+  const updated = await deleteExperience(Alumni, alumni._id,expId);
+  if (!updated) return res.status(404).json({ message: "Alumni not found" });
+  res
+  .status(200)
+  .json(
+    new ApiResponse(200,updated,"alumni experience delete successfully")
+  );
+};
+
+
 export{
     registerAlumni,
-    updateAlumniProfile
+    updateAlumniProfile,
+    updateAlumniExperience,
+    addAlumniExperience,
+    deleteAlumniExperience,
+    getAlumniExperience
 }

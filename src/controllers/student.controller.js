@@ -87,7 +87,55 @@ const updateStudentProfile = asyncHandler(async (req, res) => {
   );
 });
 
+const addStudentExperience = async (req, res) => {
+  const alumni = req.user;
+  const updated = await addExperience(Student, alumni._id, req.body);
+  if (!updated) return res.status(404).json({ message: "student not found" });
+  res
+  .status(200)
+  .json(
+    new ApiResponse(200,updated,"student experience added successfully")
+  );
+};
+
+const getStudentExperience = async (req, res) => {
+  const student = req.user;
+  const updated = await getExperiences(Student, student._id);
+  if (!updated) return res.status(404).json({ message: "Student not found" });
+  res
+  .status(200)
+  .json(
+    new ApiResponse(200,updated,"Student experience fetched successfully")
+  );
+};
+const updateStudentExperience = async (req, res) => {
+  const student = req.user;
+  const {expId} = req.params;
+  const updated = await updateExperience(Student, student._id,expId,req.body);
+  if (!updated) return res.status(404).json({ message: "Student not found" });
+  res
+  .status(200)
+  .json(
+    new ApiResponse(200,updated,"Student experience updated successfully")
+  );
+};
+const deleteStudentExperience = async (req, res) => {
+  const student = req.user;
+  const {expId} = req.params;
+  const updated = await deleteExperience(Student, student._id,expId);
+  if (!updated) return res.status(404).json({ message: "Student not found" });
+  res
+  .status(200)
+  .json(
+    new ApiResponse(200,updated,"Student experience delete successfully")
+  );
+};
+
 export{
     registerStudent,
-    updateStudentProfile
+    updateStudentProfile,
+    updateStudentExperience,
+    deleteStudentExperience,
+    getStudentExperience,
+    addStudentExperience
 }

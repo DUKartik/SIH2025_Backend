@@ -20,6 +20,9 @@ import studentRouter from "./routes/student.route.js"
 import baseUserRouter from "./routes/baseUser.route.js"
 import alumniRouter from "./routes/alumni.route.js"
 import otpRouter from "./routes/otp.route.js";
+import chatRouter from "./routes/chat.route.js";
+
+
 //routes decleration
 
 
@@ -29,5 +32,7 @@ app.use("/api/v1/students",studentRouter);
 app.use("/api/v1/admins",adminRouter);
 app.use("/api/v1/superAdmin",superAdminRouter);
 app.use("/api/v1/alumni",alumniRouter);
+app.use("/api/v1/chat", chatRouter);
+
 
 export {app};

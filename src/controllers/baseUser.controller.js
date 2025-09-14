@@ -30,15 +30,17 @@ const Login = asyncHandler(async (req,res)=>{
         throw new ApiError(401,"All fields are complusory");
     }
 
-    if(role !="Admin" && role !="SuperAdmin" && role !="Student" && role !="Alumni"){
+    if(role !="Admin" && role !="Student" && role !="Alumni"){
         throw new ApiError(404,"Invalid role choosen");
     }
 
     let user = await User.findOne({email,role});
+    let isSuperAdmin=0;
     if(!user && role==="Admin"){
-        user= await SuperAdmin.findOne({email,role:"SuperAdmin"});
+        user= await SuperAdmin.findOne({email});
+        isSuperAdmin=1;
     }
-    else if(!user){
+    if(!user){
         throw new ApiError(404,"user not found with this email");
     }
     if (!user.email_verified) {
@@ -53,9 +55,9 @@ const Login = asyncHandler(async (req,res)=>{
         throw new ApiError(401,"invalid Credentials");
     }
 
-    const {refreshToken,accessToken} = await generateAccessAndRefreshToken(user._id,role);
+    const {refreshToken,accessToken} = await generateAccessAndRefreshToken(user._id,isSuperAdmin ? "SuperAdmin" : role);
 
-    const loggedInUser = await User.findOne({email,role}).select("-password_hash -refreshToken");
+    const loggedInUser = await User.findOne({email,role:isSuperAdmin ? "SuperAdmin" : role}).select("-password_hash -refreshToken");
 
     const option={
         httpOnly:true,

@@ -42,6 +42,8 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
   if (record.otp !== otp) throw new ApiError(400, "Invalid OTP");
 
+  await User.updateOne({ email }, { $set: { email_verified: true } });
+
   // OTP verified → delete it
   await Otp.deleteOne({ email });
 

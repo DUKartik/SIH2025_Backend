@@ -6,6 +6,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/baseUser.model.js";
 import { default_avatar_url } from "../constants.js";
 import { addExperience,getExperiences,deleteExperience,updateExperience } from "../utils/experience.js";
+import { Otp } from "../models/otp.model.js";
 
 const registerAlumni = asyncHandler(async(req,res)=>{
     const {degree,batch_year,department,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -28,6 +29,16 @@ const registerAlumni = asyncHandler(async(req,res)=>{
         }
     }
 
+    const otp = await Otp.findOne({email});
+    if(!otp){
+      throw new ApiError(400,"email verified expired ,kindly verify it again");
+    }
+    let isEmailVerified=false;
+    if(otp.isVerified ===true){
+        isEmailVerified=true;
+    }else{
+      throw new ApiError(400,"Email not verified");
+    }
     const alumni = await Alumni.create(
         {
             first_name,
@@ -38,7 +49,8 @@ const registerAlumni = asyncHandler(async(req,res)=>{
             batch_year,
             department,
             email,
-            password_hash
+            password_hash,
+            email_verified: isEmailVerified,
         }
     )
 
@@ -81,7 +93,9 @@ const updateAlumniProfile = asyncHandler(async (req, res) => {
 const addAlumniExperience = async (req, res) => {
   const alumni = req.user;
   const updated = await addExperience(Alumni, alumni._id, req.body);
-  if (!updated) return res.status(404).json({ message: "Alumni not found" });
+  if (!updated){
+    throw new ApiError(400,"Alumni not Found");
+  }
   res
   .status(200)
   .json(

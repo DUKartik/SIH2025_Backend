@@ -6,6 +6,7 @@ import { college_Domain } from "../constants.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/baseUser.model.js";
 import { default_avatar_url } from "../constants.js";
+import { Otp } from "../models/otp.model.js";
 
 
 const registerStudent = asyncHandler(async(req,res)=>{
@@ -37,6 +38,17 @@ const registerStudent = asyncHandler(async(req,res)=>{
         }
     }
 
+    const otp = await Otp.findOne({email});
+    if(!otp){
+      throw new ApiError(400,"email verified expired ,kindly verify it again");
+    }
+    let isEmailVerified=false;
+    if(otp.isVerified ===true){
+        isEmailVerified=true;
+    }else{
+      throw new ApiError(400,"Email not verified");
+    }
+
     const student = await Student.create(
         {
             first_name,
@@ -48,7 +60,8 @@ const registerStudent = asyncHandler(async(req,res)=>{
             course,
             branch,
             email,
-            password_hash
+            password_hash,
+            email_verified: isEmailVerified,
         }
     )
 

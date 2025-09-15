@@ -41,18 +41,13 @@ const verifyOtp = asyncHandler(async (req, res) => {
   if (!record) throw new ApiError(400, "OTP expired or not found");
 
   if (record.otp !== otp) throw new ApiError(400, "Invalid OTP");
-
-  await User.updateOne({ email }, { $set: { email_verified: true } });
-
+  await Otp.findByIdAndUpdate(
+  record._id,
+  { $set: { verified: true } },  
+  { new: true }                   
+  );
   // OTP verified → delete it
   await Otp.deleteOne({ email });
-
-await User.findOneAndUpdate(
-    { email },
-    { $set: { email_verified: true } },
-    { new: true }
-  );
-
   return res
     .status(200)
     .json(new ApiResponse(200, { verified: true }, "OTP verified successfully.  Email marked as verified."));

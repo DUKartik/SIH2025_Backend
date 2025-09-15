@@ -41,7 +41,8 @@ const registerAdmin = asyncHandler(async(req,res)=>{
             last_name,
             avatar:avatar?.url || default_avatar_url,
             email,
-            password_hash
+            password_hash,
+            email_verified: true,
         }
     )
 

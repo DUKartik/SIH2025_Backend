@@ -25,7 +25,7 @@ router.route("/deleteAccount").delete(verifyJWT,deleteAccount);
 router.route("/getProfile").get(verifyJWT,getProfile);
 
 router.route("/searchUser").get(verifyJWT,searchUsers);
-router.route("/getAllEvents").get(verifyJWT,getAllEvents);
+router.route("/getAllEvents").get(getAllEvents);
 router.route("/updateEvent/:eventId").patch(verifyJWT,authorizeRoles("Admin"),updateEventDetails);
 router.route("/deleteEvent/:eventId").delete(verifyJWT,authorizeRoles("Admin"),deleteEvent);
 

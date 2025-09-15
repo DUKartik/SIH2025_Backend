@@ -10,13 +10,5 @@ export const canChat = (req, res, next) => {
     throw new ApiError(403, "You cannot chat with yourself");
   }
 
-  const allowedRoles = ["Alumni", "Student"];
-  if (
-    !allowedRoles.includes(user.role) ||
-    !allowedRoles.includes(req.body.recipientRole)
-  ) {
-    throw new ApiError(403, "Unauthorized to chat with this user");
-  }
-
   next();
 };

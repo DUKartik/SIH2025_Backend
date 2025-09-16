@@ -29,7 +29,7 @@ const registerAlumni = asyncHandler(async(req,res)=>{
         }
     }
 
-    const otp = await Otp.findOne({email});
+    const otp = await Otp.findOne({email:email});
     if(!otp){
       throw new ApiError(400,"email verified expired ,kindly verify it again");
     }
@@ -51,8 +51,8 @@ const registerAlumni = asyncHandler(async(req,res)=>{
             email,
             password_hash,
             email_verified: isEmailVerified,
-        }
-    )
+          }
+        )
 
     const alumniObj = alumni.toObject();
     delete alumniObj.password_hash;

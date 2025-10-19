@@ -47,26 +47,3 @@ Key features include:
 
 ### ✅ Media Handling
 - Profile pictures, event posters, and documents stored in **Cloudinary**  
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js (v18+)  
-- MongoDB Atlas account  
-- Cloudinary account  
-- Gemini API key  
-
-### Installation
-```bash
-# Clone the repository
-git clone https://github.com/your-username/your-repo.git
-
-# Navigate into the project directory
-cd your-repo
-
-# Install dependencies
-npm install
-
-# Create a .env file with required environment variables

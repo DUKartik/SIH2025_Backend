@@ -92,7 +92,12 @@ const updateAlumniProfile = asyncHandler(async (req, res) => {
 
 const addAlumniExperience = async (req, res) => {
   const alumni = req.user;
-  const updated = await addExperience(Alumni, alumni._id, req.body);
+
+  const expData = { ...req.body };
+  if(expData.isCurrent === true){
+    expData.end_date =null;
+  }
+  const updated = await addExperience(Alumni, alumni._id, expData);
   if (!updated){
     throw new ApiError(400,"Alumni not Found");
   }

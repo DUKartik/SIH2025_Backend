@@ -7,7 +7,10 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { User } from "../models/baseUser.model.js";
 import { default_avatar_url } from "../constants.js";
 import { Otp } from "../models/otp.model.js";
-
+import { addExperience,
+    getExperiences,
+    updateExperience,
+    deleteExperience} from "../utils/experience.js"
 
 const registerStudent = asyncHandler(async(req,res)=>{
     const {college_roll,batch_year,course,branch,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -101,8 +104,14 @@ const updateStudentProfile = asyncHandler(async (req, res) => {
 });
 
 const addStudentExperience = async (req, res) => {
-  const alumni = req.user;
-  const updated = await addExperience(Student, alumni._id, req.body);
+  const student = req.user;
+
+  const expData = { ...req.body };
+  if(expData.isCurrent === true){
+    expData.end_date =null;
+  }
+
+  const updated = await addExperience(Student, student._id, expData);
   if (!updated) return res.status(404).json({ message: "student not found" });
   res
   .status(200)

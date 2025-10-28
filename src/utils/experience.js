@@ -3,7 +3,7 @@ const addExperience = async (Model, parentId, expData) => {
     parentId,
     { $push: { experience: expData } },
     { new: true, runValidators: true }
-  );
+  ).select("-password_hash -refreshToken");
 };
 
 const getExperiences = async (Model, parentId) => {
@@ -12,11 +12,12 @@ const getExperiences = async (Model, parentId) => {
 };
 
 const updateExperience = async (Model, parentId, expId, updates) => {
+  const updatesWithId = { ...updates, _id: expId };
   return await Model.findOneAndUpdate(
     { _id: parentId, "experience._id": expId },
-    { $set: { "experience.$": updates } },
+    { $set: { "experience.$": updatesWithId } },
     { new: true, runValidators: true }
-  );
+  ).select("-password_hash -refreshToken");
 };
 
 const deleteExperience = async (Model, parentId, expId) => {
@@ -24,7 +25,7 @@ const deleteExperience = async (Model, parentId, expId) => {
     parentId,
     { $pull: { experience: { _id: expId } } },
     { new: true }
-  );
+  ).select("-password_hash -refreshToken");
 };
 
 export {

@@ -24,6 +24,7 @@
   "homepage": "https://github.com/DUKartik/SIH2025_Backend#readme",
   "dependencies": {
     "@google/genai": "^1.18.0",
+    "axios": "^1.6.2",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",

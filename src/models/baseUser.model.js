@@ -37,6 +37,11 @@ const BaseUserSchema = new mongoose.Schema(
         },
         refreshToken:{
             type:String,
+        },
+        faceEmbedding: {
+          embedding: [{ type: Number }],  // 128-dimensional face embedding vector
+          imageUrl: { type: String },      // Cloudinary URL of the image used for embedding
+          createdAt: { type: Date }
         }
   },
   options

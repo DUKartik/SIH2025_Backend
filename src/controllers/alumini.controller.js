@@ -7,6 +7,7 @@ import { User } from "../models/baseUser.model.js";
 import { default_avatar_url } from "../constants.js";
 import { addExperience,getExperiences,deleteExperience,updateExperience } from "../utils/experience.js";
 import { Otp } from "../models/otp.model.js";
+import { extractAndSaveFaceEmbedding } from "../utils/faceRecognition.js";
 
 const registerAlumni = asyncHandler(async(req,res)=>{
     const {degree,batch_year,department,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -54,6 +55,13 @@ const registerAlumni = asyncHandler(async(req,res)=>{
           }
         )
 
+    // Extract and save face embedding (non-blocking)
+    if (avatar?.url) {
+        extractAndSaveFaceEmbedding(alumni, avatar.url).catch(err => {
+            console.error('Face embedding extraction failed:', err.message);
+        });
+    }
+
     const alumniObj = alumni.toObject();
     delete alumniObj.password_hash;
     delete alumniObj.refreshToken;
@@ -83,6 +91,13 @@ const updateAlumniProfile = asyncHandler(async (req, res) => {
 
   if (!isChanged) {
     throw new ApiError(400, "No fields were updated");
+  }
+
+  // If avatar was updated, regenerate face embedding (non-blocking)
+  if (req.body.avatar && req.body.avatar !== oldAlumni.avatar) {
+    extractAndSaveFaceEmbedding(updatedAlumni, req.body.avatar).catch(err => {
+      console.error('Face embedding regeneration failed:', err.message);
+    });
   }
 
   return res.status(200).json(

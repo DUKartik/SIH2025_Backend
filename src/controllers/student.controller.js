@@ -11,6 +11,7 @@ import { addExperience,
     getExperiences,
     updateExperience,
     deleteExperience} from "../utils/experience.js"
+import { extractAndSaveFaceEmbedding } from "../utils/faceRecognition.js";
 
 const registerStudent = asyncHandler(async(req,res)=>{
     const {college_roll,batch_year,course,branch,first_name,middle_name,last_name,email,password_hash} = req.body || {};
@@ -68,6 +69,13 @@ const registerStudent = asyncHandler(async(req,res)=>{
         }
     )
 
+    // Extract and save face embedding (non-blocking)
+    if (avatar?.url) {
+        extractAndSaveFaceEmbedding(student, avatar.url).catch(err => {
+            console.error('Face embedding extraction failed:', err.message);
+        });
+    }
+
     const studentObj = student.toObject();
     delete studentObj.password_hash;
     delete studentObj.refreshToken;
@@ -96,6 +104,13 @@ const updateStudentProfile = asyncHandler(async (req, res) => {
 
   if (!isChanged) {
     throw new ApiError(400, "No fields were updated");
+  }
+
+  // If avatar was updated, regenerate face embedding (non-blocking)
+  if (req.body.avatar && req.body.avatar !== student.avatar) {
+    extractAndSaveFaceEmbedding(updatedStudent, req.body.avatar).catch(err => {
+      console.error('Face embedding regeneration failed:', err.message);
+    });
   }
 
   return res.status(200).json(

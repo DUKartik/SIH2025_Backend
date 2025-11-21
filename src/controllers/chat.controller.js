@@ -24,7 +24,6 @@ const initiateConversation = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, conversation, "Conversation ready"));
 });
 
-// Get user conversations
 const getUserConversations = asyncHandler(async (req, res) => {
   const conversations = await Conversation.find({
     members: req.user._id,

@@ -198,14 +198,14 @@ const getUserById = asyncHandler(async (req, res) => {
   if (!id) throw new ApiError(400, "id required");
   if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid id");
 
-  const user = await User.findById(id).select("-password_hash -refreshToken");
+  const user = await User.findById(id).select("-password_hash -refreshToken -faceEmbedding");
   if (!user) throw new ApiError(404, "User not found");
   return res.status(200).json(new ApiResponse(200, user, "User fetched"));
 });
 
 const searchUsers = asyncHandler(async (req, res) => {
   // Extract data from both query params (for backwards compatibility) and body   //prefer post queries
-  const data = { ...req.query, ...req.body };
+  const data = { ...req.body };
   
   const { 
     role, 
@@ -303,14 +303,14 @@ const searchUsers = asyncHandler(async (req, res) => {
       { first_name: regex },
       { middle_name: regex },
       { last_name: regex },
-      { email: regex },
-      { department: regex },
-      { course: regex },
-      { degree: regex },
-      { college_roll: regex },
+      // { email: regex },
+      // { department: regex },
+      // { course: regex },
+      // { degree: regex },
+      // { college_roll: regex },
     ];
-    const maybeNum = Number(q);
-    if (!Number.isNaN(maybeNum)) or.push({ batch_year: maybeNum });
+    // const maybeNum = Number(q);
+    // if (!Number.isNaN(maybeNum)) or.push({ batch_year: maybeNum });
     
     // Combine with existing filter
     if (filter._id) {
@@ -334,18 +334,18 @@ const searchUsers = asyncHandler(async (req, res) => {
     }
   }
 
-  if (batch_year) filter.batch_year = Number(batch_year);
-  if (role === "Alumni") {
-    if (degree) filter.degree = new RegExp(degree, "i");
-    if (department) filter.department = new RegExp(department, "i");
-    if (location) filter.location = new RegExp(location, "i");
-  }
-  if (role === "Student") {
-    if (branch) filter.branch = new RegExp(branch, "i");
-    if (skills) {
-      filter.skills = { $in: skills.split(",").map((s) => s.trim()) };
-    }
-  }
+  // if (batch_year) filter.batch_year = Number(batch_year);
+  // if (role === "Alumni") {
+  //   if (degree) filter.degree = new RegExp(degree, "i");
+  //   if (department) filter.department = new RegExp(department, "i");
+  //   if (location) filter.location = new RegExp(location, "i");
+  // }
+  // if (role === "Student") {
+  //   if (branch) filter.branch = new RegExp(branch, "i");
+  //   if (skills) {
+  //     filter.skills = { $in: skills.split(",").map((s) => s.trim()) };
+  //   }
+  // }
 
   // Exclude self if logged in
   if (req.user && req.user._id) {
@@ -362,7 +362,7 @@ const searchUsers = asyncHandler(async (req, res) => {
   }
 
   // Execute query
-  let results = await Model.find(filter).select("-password_hash -refreshToken -email");
+  let results = await Model.find(filter).select("-password_hash -refreshToken -email -faceEmbedding");
 
   // If face search was performed, sort results by similarity score
   if (faceSearchResults) {

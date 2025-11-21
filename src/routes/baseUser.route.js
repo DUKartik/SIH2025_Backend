@@ -24,9 +24,6 @@ router.route("/refreshAccessToken").get(refreshAccessToken);
 router.route("/ChangeCurrentPassword").patch(verifyJWT,changeCurrentPassword);
 router.route("/deleteAccount").delete(verifyJWT,deleteAccount);
 router.route("/getProfile").get(verifyJWT,getProfile);
-
-// Support both GET (text search) and POST (with photo for face search)
-router.route("/searchUser").get(verifyJWT,searchUsers);
 router.route("/searchUser").post(verifyJWT, upload.single("photo"), searchUsers);
 router.route("/getAllEvents").get(getAllEvents);
 router.route("/updateEvent/:eventId").patch(verifyJWT,authorizeRoles("Admin"),updateEventDetails);

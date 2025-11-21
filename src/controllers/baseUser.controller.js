@@ -198,7 +198,7 @@ const getUserById = asyncHandler(async (req, res) => {
   if (!id) throw new ApiError(400, "id required");
   if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid id");
 
-  const user = await User.findById(id).select("-password_hash -refreshToken");
+  const user = await User.findById(id).select("-password_hash -refreshToken -faceEmbedding");
   if (!user) throw new ApiError(404, "User not found");
   return res.status(200).json(new ApiResponse(200, user, "User fetched"));
 });

@@ -24,7 +24,6 @@ const initiateConversation = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, conversation, "Conversation ready"));
 });
 
-// Get user conversations
 const getUserConversations = asyncHandler(async (req, res) => {
   const conversations = await Conversation.find({
     members: req.user._id,
@@ -32,9 +31,21 @@ const getUserConversations = asyncHandler(async (req, res) => {
     .populate("members", "first_name last_name avatar email role")
     .sort({ updatedAt: -1 });
 
+  const formatted = conversations.map(conv => {
+    const otherPerson = conv.members.find(
+      member => member._id.toString() !== req.user._id.toString()
+    );
+
+    return {
+      _id: conv._id,
+      user: otherPerson,     // only the person chatting with him
+      createdAt: conv.createdAt,
+      updatedAt: conv.updatedAt
+    };
+  });
   return res
     .status(200)
-    .json(new ApiResponse(200, conversations, "Conversations fetched"));
+    .json(new ApiResponse(200, formatted, "Conversations fetched"));
 });
 
 // Get messages for a conversation

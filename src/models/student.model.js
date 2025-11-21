@@ -26,9 +26,40 @@ const StudentSchema = new mongoose.Schema({
         description: { type: String },
         technologies: [{ type: String }],
         link: { type: String },
+        startDate: { type: Date },
+        endDate: { type: Date },
       },
     ],
     experience: [ExperienceSchema],
+    // Gamification fields
+    xp: {
+      type: Number,
+      default: 0,
+    },
+    level: {
+      type: Number,
+      default: 1,
+    },
+    // Stats fields (0-100 scale)
+    stats: {
+      technicalMastery: { type: Number, default: 0, min: 0, max: 100 },
+      projectPower: { type: Number, default: 0, min: 0, max: 100 },
+      collaboration: { type: Number, default: 0, min: 0, max: 100 },
+      innovationCreativity: { type: Number, default: 0, min: 0, max: 100 },
+      problemSolving: { type: Number, default: 0, min: 0, max: 100 },
+      academicEndurance: { type: Number, default: 0, min: 0, max: 100 },
+      leadership: { type: Number, default: 0, min: 0, max: 100 },
+      extracurricular: { type: Number, default: 0, min: 0, max: 100 },
+    },
+    // Timeline/Achievements
+    achievements: [
+      {
+        title: { type: String },
+        description: { type: String },
+        date: { type: Date },
+        category: { type: String },
+      },
+    ],
 });
 
 export const Student = User.discriminator("Student", StudentSchema);

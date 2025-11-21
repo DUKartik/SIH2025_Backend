@@ -27,7 +27,7 @@ router.route("/getProfile").get(verifyJWT,getProfile);
 
 // Support both GET (text search) and POST (with photo for face search)
 router.route("/searchUser").get(verifyJWT,searchUsers);
-router.route("/searchUser").post(verifyJWT, upload.single("photo"), searchUsers);
+router.route("/searchUser").post(verifyJWT,upload.single("photo"), searchUsers);
 router.route("/getAllEvents").get(getAllEvents);
 router.route("/updateEvent/:eventId").patch(verifyJWT,authorizeRoles("Admin"),updateEventDetails);
 router.route("/deleteEvent/:eventId").delete(verifyJWT,authorizeRoles("Admin"),deleteEvent);

@@ -168,11 +168,289 @@ const deleteStudentExperience = async (req, res) => {
   );
 };
 
+// ==================== PROJECT CRUD OPERATIONS ====================
+
+const addStudentProject = asyncHandler(async (req, res) => {
+  const student = req.user;
+  const { title, description, technologies, link, startDate, endDate } = req.body;
+
+  if (!title) {
+    throw new ApiError(400, "Project title is required");
+  }
+
+  const updatedStudent = await Student.findByIdAndUpdate(
+    student._id,
+    {
+      $push: {
+        projects: {
+          title,
+          description,
+          technologies: technologies || [],
+          link,
+          startDate,
+          endDate,
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (!updatedStudent) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedStudent.projects, "Project added successfully")
+    );
+});
+
+const getStudentProjects = asyncHandler(async (req, res) => {
+  const student = req.user;
+
+  const studentData = await Student.findById(student._id).select("projects");
+
+  if (!studentData) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, studentData.projects, "Projects fetched successfully")
+    );
+});
+
+const updateStudentProject = asyncHandler(async (req, res) => {
+  const student = req.user;
+  const { projectId } = req.params;
+  const { title, description, technologies, link, startDate, endDate } = req.body;
+
+  const updatedStudent = await Student.findOneAndUpdate(
+    { _id: student._id, "projects._id": projectId },
+    {
+      $set: {
+        "projects.$.title": title,
+        "projects.$.description": description,
+        "projects.$.technologies": technologies,
+        "projects.$.link": link,
+        "projects.$.startDate": startDate,
+        "projects.$.endDate": endDate,
+      },
+    },
+    { new: true }
+  );
+
+  if (!updatedStudent) {
+    throw new ApiError(404, "Student or project not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedStudent.projects, "Project updated successfully")
+    );
+});
+
+const deleteStudentProject = asyncHandler(async (req, res) => {
+  const student = req.user;
+  const { projectId } = req.params;
+
+  const updatedStudent = await Student.findByIdAndUpdate(
+    student._id,
+    {
+      $pull: { projects: { _id: projectId } },
+    },
+    { new: true }
+  );
+
+  if (!updatedStudent) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedStudent.projects, "Project deleted successfully")
+    );
+});
+
+// ==================== ACHIEVEMENT CRUD OPERATIONS ====================
+
+const addStudentAchievement = asyncHandler(async (req, res) => {
+  const student = req.user;
+  const { title, description, date, category } = req.body;
+
+  if (!title) {
+    throw new ApiError(400, "Achievement title is required");
+  }
+
+  const updatedStudent = await Student.findByIdAndUpdate(
+    student._id,
+    {
+      $push: {
+        achievements: {
+          title,
+          description,
+          date: date || new Date(),
+          category,
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (!updatedStudent) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        updatedStudent.achievements,
+        "Achievement added successfully"
+      )
+    );
+});
+
+const getStudentAchievements = asyncHandler(async (req, res) => {
+  const student = req.user;
+
+  const studentData = await Student.findById(student._id).select("achievements");
+
+  if (!studentData) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  // Sort achievements by date (most recent first)
+  const sortedAchievements = studentData.achievements.sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        sortedAchievements,
+        "Achievements fetched successfully"
+      )
+    );
+});
+
+const updateStudentAchievement = asyncHandler(async (req, res) => {
+  const student = req.user;
+  const { achievementId } = req.params;
+  const { title, description, date, category } = req.body;
+
+  const updatedStudent = await Student.findOneAndUpdate(
+    { _id: student._id, "achievements._id": achievementId },
+    {
+      $set: {
+        "achievements.$.title": title,
+        "achievements.$.description": description,
+        "achievements.$.date": date,
+        "achievements.$.category": category,
+      },
+    },
+    { new: true }
+  );
+
+  if (!updatedStudent) {
+    throw new ApiError(404, "Student or achievement not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        updatedStudent.achievements,
+        "Achievement updated successfully"
+      )
+    );
+});
+
+const deleteStudentAchievement = asyncHandler(async (req, res) => {
+  const student = req.user;
+  const { achievementId } = req.params;
+
+  const updatedStudent = await Student.findByIdAndUpdate(
+    student._id,
+    {
+      $pull: { achievements: { _id: achievementId } },
+    },
+    { new: true }
+  );
+
+  if (!updatedStudent) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        updatedStudent.achievements,
+        "Achievement deleted successfully"
+      )
+    );
+});
+
+// Get achievements by category (optional filter)
+const getStudentAchievementsByCategory = asyncHandler(async (req, res) => {
+  const student = req.user;
+  const { category } = req.params;
+
+  const studentData = await Student.findById(student._id).select("achievements");
+
+  if (!studentData) {
+    throw new ApiError(404, "Student not found");
+  }
+
+  // Filter by category if provided
+  const filteredAchievements = category
+    ? studentData.achievements.filter(
+        (achievement) => achievement.category === category
+      )
+    : studentData.achievements;
+
+  // Sort by date (most recent first)
+  const sortedAchievements = filteredAchievements.sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        sortedAchievements,
+        `Achievements fetched successfully${
+          category ? ` for category: ${category}` : ""
+        }`
+      )
+    );
+});
+
 export{
     registerStudent,
     updateStudentProfile,
     updateStudentExperience,
     deleteStudentExperience,
     getStudentExperience,
-    addStudentExperience
+    addStudentExperience,
+    addStudentProject,
+    getStudentProjects,
+    updateStudentProject,
+    deleteStudentProject,
+    addStudentAchievement,
+    getStudentAchievements,
+    updateStudentAchievement,
+    deleteStudentAchievement,
+    getStudentAchievementsByCategory
 }

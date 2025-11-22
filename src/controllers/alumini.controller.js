@@ -9,9 +9,9 @@ import { addExperience,getExperiences,deleteExperience,updateExperience } from "
 import { Otp } from "../models/otp.model.js";
 import { extractAndSaveFaceEmbedding } from "../utils/faceRecognition.js";
 
-const registerAlumni = asyncHandler(async(req,res)=>{                                             // is profile complete check in model of alumni and student
+const registerAlumni = asyncHandler(async(req,res)=>{                                             // at login frontend should check isProfileComplete for student/alumni and give a pop up.
     const {first_name,middle_name,last_name,email,password_hash} = req.body || {};                     
-                                                                                                  // also make admin only get alumni profiles which are complete.
+                                                                                                
     const requiredFields = {first_name,last_name, email, password_hash };
     
     if (Object.values(requiredFields).some(value => !value)) {
@@ -56,13 +56,6 @@ const registerAlumni = asyncHandler(async(req,res)=>{                           
             email_verified: isEmailVerified,
           }
         )
-
-    // Extract and save face embedding (non-blocking)                                           // transfer this to antoher profile completion funciton
-    // if (avatar?.url) {
-    //     extractAndSaveFaceEmbedding(alumni, avatar.url).catch(err => {
-    //         console.error('Face embedding extraction failed:', err.message);
-    //     });
-    // }
 
     const alumniObj = alumni.toObject();
     delete alumniObj.password_hash;
@@ -125,7 +118,7 @@ const updateAlumniProfile = asyncHandler(async (req, res) => {
   const updatedAlumni = await Alumni.findByIdAndUpdate(
     oldAlumni._id,
     { $set: req.body },
-    { new: true }
+    { new: true , select : "-passowrd_hash -refreshToken -faceEmbedding "}
   );
 
   const isChanged = Object.keys(req.body).some(

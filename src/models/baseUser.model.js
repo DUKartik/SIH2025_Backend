@@ -19,7 +19,7 @@ const BaseUserSchema = new mongoose.Schema(
         },
         avatar: {
           type: String,
-          required:true
+          required:false
         },
         email: { 
           type: String,

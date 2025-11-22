@@ -4,7 +4,7 @@ import ExperienceSchema from "./experience.model.js";
 const AlumniSchema = new mongoose.Schema({
   batch_year: { 
     type: Number, 
-    required: true 
+    required: false 
   },
   degree: { 
     type: String, 
@@ -12,11 +12,18 @@ const AlumniSchema = new mongoose.Schema({
   },
   department: { 
     type: String, 
-    required: true 
+    required: false 
   },
   approved: { 
     type: Boolean, 
     default: false 
+  },
+  isProfileComplete: { 
+    type: Boolean, 
+    default: false 
+  },
+  aboutMe:{
+    type : String,
   },
   current_position: { type: String },
   current_company: { type: String },

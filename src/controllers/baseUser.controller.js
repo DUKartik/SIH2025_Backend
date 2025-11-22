@@ -27,7 +27,7 @@ const generateAccessAndRefreshToken=async(_id,role)=>
 
 const Login = asyncHandler(async (req,res)=>{
     const {email,password,role} = req.body;
-
+    let msg2 = ".";
     if(!email || !password || !role){
         throw new ApiError(401,"All fields are complusory");
     }
@@ -45,21 +45,25 @@ const Login = asyncHandler(async (req,res)=>{
     if(!user){
         throw new ApiError(404,"user not found with this email");
     }
+    const isPasswordValid= await user.isPasswordCorrect(password);
+    if(!isPasswordValid){
+        throw new ApiError(401,"invalid Credentials");
+    }
     if (!user.email_verified) {
         throw new ApiError(400, "Email is not verified. Please verify OTP first.");
+    }
+    if(user.role == "Alumni" && user.isProfileComplete==false){                                             // frontend needs to redirect to profile completion page
+        msg2=", Thankyou for registrating! You need to complete your profile first";
     }
     if(user.role == "Alumni" && user.approved==false){
         throw new ApiError(403,"Thankyou for registrating! Your account is now awaiting review")
     }
 
-    const isPasswordValid= await user.isPasswordCorrect(password);
-    if(!isPasswordValid){
-        throw new ApiError(401,"invalid Credentials");
-    }
+
 
     const {refreshToken,accessToken} = await generateAccessAndRefreshToken(user._id,isSuperAdmin ? "SuperAdmin" : role);
 
-    const loggedInUser = await User.findOne({email,role:isSuperAdmin ? "SuperAdmin" : role}).select("-password_hash -refreshToken");
+    const loggedInUser = await User.findOne({email,role:isSuperAdmin ? "SuperAdmin" : role}).select("-password_hash -refreshToken -faceEmbedding");
 
     const option={
         httpOnly:true,
@@ -72,7 +76,7 @@ const Login = asyncHandler(async (req,res)=>{
     .cookie("accessToken",accessToken,option)
     .cookie("refreshToken",refreshToken,option)
     .json(
-        new ApiResponse(200,loggedInUser,"Loggedin Successfully")
+        new ApiResponse(200,loggedInUser,`Loggedin Successfully${msg2}`)
     )
 })
 

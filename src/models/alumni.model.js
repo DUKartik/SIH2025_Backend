@@ -14,6 +14,10 @@ const AlumniSchema = new mongoose.Schema({
     type: String, 
     required: false 
   },
+  course: { 
+        type: String, 
+        required: false 
+    },
   approved: { 
     type: Boolean, 
     default: false 
@@ -22,7 +26,7 @@ const AlumniSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
-  aboutMe:{
+  about_me:{
     type : String,
   },
   current_position: { type: String },

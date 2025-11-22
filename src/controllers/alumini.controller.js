@@ -74,10 +74,10 @@ if(oldAlumni.isProfileComplete){
   throw new ApiError (400, "Profile already complete");
 }
 
-  const {department, batch_year, aboutMe} = {...req.body};
+  const {department, batch_year, about_me, course} = {...req.body};
   const avatarLocalPath=req.file?.path;
 
-  const required_fields ={department, batch_year, aboutMe};
+  const required_fields ={department, batch_year, about_me, course};
   if(Object.values(required_fields).some(value => !value)){
     throw new ApiError(400,"Kindly fill the mandatory fields to complete profile");
   }
@@ -94,7 +94,7 @@ if(oldAlumni.isProfileComplete){
   }
     const updatedAlumni = await Alumni.findByIdAndUpdate(
     oldAlumni._id,
-    { $set: {...req.body, isProfileComplete: true} },
+    { $set: {...req.body, isProfileComplete: true, avatar: avatar?.url} },
     { new: true , select : "-password_hash -refreshToken -faceEmbedding" }
   );
 

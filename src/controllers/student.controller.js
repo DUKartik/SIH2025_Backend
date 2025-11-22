@@ -13,16 +13,15 @@ import { addExperience,
     deleteExperience} from "../utils/experience.js"
 import { extractAndSaveFaceEmbedding } from "../utils/faceRecognition.js";
 
-const registerStudent = asyncHandler(async(req,res)=>{
-    const {college_roll,batch_year,course,branch,first_name,middle_name,last_name,email,password_hash} = req.body || {};
-    
-    const requiredFields = { college_roll, batch_year, course, branch, first_name,last_name, email, password_hash };
+const registerStudent = asyncHandler(async(req,res)=>{                                             // at login frontend should check isProfileComplete for student/alumni and give a pop up.
+    const {first_name,middle_name,last_name,email,password_hash,college_roll} = req.body || {};                     
+                                                                                                
+    const requiredFields = {first_name,last_name,email,password_hash,college_roll};
     
     if (Object.values(requiredFields).some(value => !value)) {
         throw new ApiError(400, "kindly fill the mandatory field");
-    }
-    
-    const emailDomain = email.includes("@") ? email.split("@")[1] : null;
+    }       
+  const emailDomain = email.includes("@") ? email.split("@")[1] : null;
 
     if(emailDomain==null || emailDomain!=college_Domain){
         throw new ApiError(404,"invalid Email, kindly Enter your college mail");
@@ -32,19 +31,9 @@ const registerStudent = asyncHandler(async(req,res)=>{
     if(checkUnique){
         throw new ApiError(404,"User Already exist with this email");
     }
-    
-    const avatarLocalPath = req.file?.path;
-    let avatar;
-    if(avatarLocalPath){
-        avatar =await uploadOnCloudinary(avatarLocalPath);
-        if(!avatar?.url){
-            throw new ApiError(400,"Something went wrong while uploading avatar on cloudinary");
-        }
-    }
-
-    const otp = await Otp.findOne({email});
+    const otp = await Otp.findOne({email:email});
     if(!otp){
-      throw new ApiError(400,"email verified expired ,kindly verify it again");
+      throw new ApiError(400,"email verification expired ,kindly verify it again");
     }
     let isEmailVerified=false;
     if(otp.isVerified ===true){
@@ -58,27 +47,17 @@ const registerStudent = asyncHandler(async(req,res)=>{
             first_name,
             middle_name,
             last_name,
-            avatar:avatar?.url || default_avatar_url,
-            college_roll,
-            batch_year,
-            course,
-            branch,
+            college_roll,                   
             email,
             password_hash,
             email_verified: isEmailVerified,
-        }
-    )
-
-    // Extract and save face embedding (non-blocking)
-    if (avatar?.url) {
-        extractAndSaveFaceEmbedding(student, avatar.url).catch(err => {
-            console.error('Face embedding extraction failed:', err.message);
-        });
-    }
+          }
+        )
 
     const studentObj = student.toObject();
     delete studentObj.password_hash;
     delete studentObj.refreshToken;
+    delete studentObj.faceEmbedding;
     return res
     .status(200)
     .json(
@@ -86,6 +65,48 @@ const registerStudent = asyncHandler(async(req,res)=>{
     )
 })
 
+const completeStudentProfile = asyncHandler(async(req,res)=>{
+const oldStudent = req.user;
+
+if(oldStudent.isProfileComplete){
+  throw new ApiError (400, "Profile already complete");
+}
+
+  const {department, batch_year, about_me, course, course_duration} = {...req.body};
+  const avatarLocalPath=req.file?.path;
+
+  const required_fields ={department, batch_year, about_me, course, course_duration};
+  if(Object.values(required_fields).some(value => !value)){
+    throw new ApiError(400,"Kindly fill the mandatory fields to complete profile");
+  }
+
+  let avatar;
+  if(avatarLocalPath){
+    avatar = await uploadOnCloudinary(avatarLocalPath);
+    if(!avatar?.url){
+      throw new ApiError(400, "Something went wrong and could not upload image on cloudinary");
+    }
+    }
+  else{
+    throw new ApiError(400, "Please upload the avatar to complete profile");
+  }
+    const updatedStudent = await Student.findByIdAndUpdate(
+    oldStudent._id,
+    { $set: {...req.body, isProfileComplete: true, avatar: avatar?.url} },
+    { new: true , select : "-password_hash -refreshToken -faceEmbedding" }
+  );
+
+  if (avatar?.url) {
+        extractAndSaveFaceEmbedding(updatedStudent, avatar.url).catch(err => {
+            console.error('Face embedding extraction failed:', err.message);
+        });
+    }
+
+
+
+  return res.status(200).json(new ApiResponse(200, updatedStudent, "Student profile completed"));
+
+})
 const updateStudentProfile = asyncHandler(async (req, res) => {
   const student = req.user;
   if (!student) {
@@ -439,6 +460,7 @@ const getStudentAchievementsByCategory = asyncHandler(async (req, res) => {
 
 export{
     registerStudent,
+    completeStudentProfile,
     updateStudentProfile,
     updateStudentExperience,
     deleteStudentExperience,

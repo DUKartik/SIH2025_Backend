@@ -9,16 +9,23 @@ const StudentSchema = new mongoose.Schema({
     },
     batch_year: { 
         type: Number, 
-        required: true 
+        required: false 
     },
-    course: { 
+  course: { 
         type: String, 
-        required: true 
+        required: false 
     },
-    branch: { 
-        type: String, 
-        required: true 
-    },
+    course_duration: { 
+    type: Number, 
+    default: false 
+  },
+    isProfileComplete: { 
+    type: Boolean, 
+    default: false 
+  },
+    about_me:{
+    type : String,
+  },
     skills: [{ type: String }],
     projects: [
       {

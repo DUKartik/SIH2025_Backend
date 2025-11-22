@@ -52,7 +52,7 @@ const Login = asyncHandler(async (req,res)=>{
     if (!user.email_verified) {
         throw new ApiError(400, "Email is not verified. Please verify OTP first.");
     }
-    if(user.role == "Alumni" && user.isProfileComplete==false){                                             // frontend needs to redirect to profile completion page
+    if((user.role == "Alumni" || user.role == "Student") && user.isProfileComplete==false){                                             // frontend needs to redirect to profile completion page
         msg2=", Thankyou for registrating! You need to complete your profile first";
     }
     if(user.role == "Alumni" && user.approved==false){

@@ -23,7 +23,7 @@ const router = Router();
 
 router.route("/registerStudent").post(registerStudent);
 router.route("/completeStudentProfile").post(verifyJWT,authorizeRoles("Student"),upload.single("avatar"),completeStudentProfile);
-router.route("/updateProfile").patch(verifyJWT,authorizeRoles("Student","Admin"),updateStudentProfile);
+router.route("/updateProfile").patch(verifyJWT,authorizeRoles("Student","Admin"),upload.single("avatar"),updateStudentProfile);
 
 // Experience routes
 router.route("/addExperience").post(verifyJWT,authorizeRoles("Student"),addStudentExperience);

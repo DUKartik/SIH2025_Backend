@@ -112,24 +112,31 @@ const updateStudentProfile = asyncHandler(async (req, res) => {
   if (!student) {
     throw new ApiError(404, "Student not found");
   }
+  //
+  const update={...req.body};
+  const avatarLocalPath=req.file?.path;
+  if(avatarLocalPath){
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    if(!avatar?.url){
+      throw new ApiError(400, "Something went wrong and could not upload image on cloudinary");
+    }
+    else{
+      update.avatar = avatar?.url;
+    }
+    }
+  //  
+
 
   const updatedStudent = await Student.findByIdAndUpdate(
     student._id,
-    { $set: req.body },
-    { new: true }
+    { $set:  update},
+    { new: true , select : "-password_hash -refreshToken -faceEmbedding"}
   );
 
-  const isChanged = Object.keys(req.body).some(
-    (key) => String(student[key]) !== String(updatedStudent[key])
-  );
-
-  if (!isChanged) {
-    throw new ApiError(400, "No fields were updated");
-  }
 
   // If avatar was updated, regenerate face embedding (non-blocking)
-  if (req.body.avatar && req.body.avatar !== student.avatar) {
-    extractAndSaveFaceEmbedding(updatedStudent, req.body.avatar).catch(err => {
+  if (update.avatar) {
+    extractAndSaveFaceEmbedding(updatedStudent, update.avatar).catch(err => {
       console.error('Face embedding regeneration failed:', err.message);
     });
   }

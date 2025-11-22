@@ -14,7 +14,7 @@ const router =Router();
 
 router.route("/registerAlumni").post(upload.single("degree"),registerAlumni);
 router.route("/completeAlumniProfile").post(verifyJWT,authorizeRoles("Alumni"),upload.single("avatar"),completeAlumniProfile);
-router.route("/updateprofile").get(verifyJWT,updateAlumniProfile);
+router.route("/updateprofile").patch(verifyJWT,authorizeRoles("Alumni","Admin"),upload.single("avatar"),updateAlumniProfile);
 
 router.route("/addExperience").post(verifyJWT,authorizeRoles("Alumni"),addAlumniExperience);
 router.route("/getExperience").get(verifyJWT,authorizeRoles("Alumni"),getAlumniExperience);

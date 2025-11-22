@@ -110,28 +110,35 @@ if(oldAlumni.isProfileComplete){
 //
 })
 const updateAlumniProfile = asyncHandler(async (req, res) => {
-  const oldAlumni = req.user;
-  if (!oldAlumni) {
+  const alumni = req.user;
+  if (!alumni) {
     throw new ApiError(404, "Alumni not found");
   }
+  //
+  const update={...req.body};
+  const avatarLocalPath=req.file?.path;
+  if(avatarLocalPath){
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    if(!avatar?.url){
+      throw new ApiError(400, "Something went wrong and could not upload image on cloudinary");
+    }
+    else{
+      update.avatar = avatar?.url;
+    }
+    }
+  //  
+
 
   const updatedAlumni = await Alumni.findByIdAndUpdate(
-    oldAlumni._id,
-    { $set: req.body },
-    { new: true , select : "-passowrd_hash -refreshToken -faceEmbedding "}
+    alumni._id,
+    { $set:  update},
+    { new: true , select : "-password_hash -refreshToken -faceEmbedding"}
   );
 
-  const isChanged = Object.keys(req.body).some(
-    (key) => String(oldAlumni[key]) !== String(updatedAlumni[key])
-  );
-
-  if (!isChanged) {
-    throw new ApiError(400, "No fields were updated");
-  }
 
   // If avatar was updated, regenerate face embedding (non-blocking)
-  if (req.body.avatar && req.body.avatar !== oldAlumni.avatar) {
-    extractAndSaveFaceEmbedding(updatedAlumni, req.body.avatar).catch(err => {
+  if (update.avatar) {
+    extractAndSaveFaceEmbedding(updatedAlumni, update.avatar).catch(err => {
       console.error('Face embedding regeneration failed:', err.message);
     });
   }

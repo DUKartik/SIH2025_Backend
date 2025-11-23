@@ -9,7 +9,8 @@ const ExperienceSchema = new mongoose.Schema(
     end_date: { type: Date },                      
     description: { type: String },
     technologies: [{ type: String }],
-    isCurrent: { type: Boolean, default: false },              
+    isCurrent: { type: Boolean, default: false },
+    llmTags: { type: Object, default: {} },              
   }
 );
 

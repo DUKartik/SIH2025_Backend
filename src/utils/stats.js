@@ -57,6 +57,12 @@ function extractJSON(rawText) {
 
 async function llmEnrich(exps) {
   try {
+    // Filter out experiences that already have valid tags
+    const toEnrich = exps.filter(e => !e.llmTags || Object.keys(e.llmTags).length === 0);
+
+    if (toEnrich.length === 0) {
+      return exps;
+    }
     const prompt = `
 Return ONLY a JSON array. No code blocks. No explanations.
 Each item must be a JSON object with fields:
@@ -64,7 +70,7 @@ Each item must be a JSON object with fields:
 "complexity", "problem_solving", "leadership".
 
 Experiences:
-${exps.map((e, i) => `[${i}] ${e.title} | ${e.description}`).join("\n")}
+${toEnrich.map((e, i) => `[${i}] ${e.title} | ${e.description}`).join("\n")}
 `;
 
     const response = await ai.models.generateContent({
@@ -91,13 +97,18 @@ ${exps.map((e, i) => `[${i}] ${e.title} | ${e.description}`).join("\n")}
     const clean = extractJSON(rawText);
     const json = JSON.parse(clean);
 
-    return exps.map((e, i) => ({
-      ...e,
-      llmTags: json[i] || {},
-    }));
+    let enrichIndex = 0;
+    return exps.map((e) => {
+      if (!e.llmTags || Object.keys(e.llmTags).length === 0) {
+        const tags = json[enrichIndex] || {};
+        enrichIndex++;
+        return { ...e, llmTags: tags };
+      }
+      return e;
+    });
   } catch (err) {
     console.error("LLM enrichment failed:", err);
-    return exps.map((e) => ({ ...e, llmTags: {} }));
+    return exps;
   }
 }
 
@@ -155,6 +166,7 @@ async function LevelIncrementAgent(profile) {
 // ------------------------------
 function StatsScorerAgent(profile) {
   const expList = profile.experiences;
+  const achievements = profile.achievements || [];
 
   const techPairs = Object.entries(profile.techLevels).map(([t, lvl]) => [
     lvl,
@@ -172,7 +184,8 @@ function StatsScorerAgent(profile) {
   );
 
   const innovationCreativity = clamp(
-    expList.reduce((a, e) => a + (e.llmTags?.creativity ?? 5), 0) * 2
+    expList.reduce((a, e) => a + (e.llmTags?.creativity ?? 5), 0) * 2+
+    achievements.reduce((a, ach) => a + (ach.llmTags?.innovation ?? 3), 0)
   );
 
   const problemSolving = clamp(
@@ -193,12 +206,20 @@ function StatsScorerAgent(profile) {
   );
 
   const leadership = clamp(
-    expList.reduce((a, e) => a + (e.llmTags?.leadership ?? 5), 0) * 2
+    expList.reduce((a, e) => a + (e.llmTags?.leadership ?? 5), 0) * 2 +
+    achievements.reduce((a, ach) => a + (ach.llmTags?.leadership ?? 3), 0)
   );
 
-  const extracurricular = clamp(
-    profile.signals?.extracurricularScore ?? 0
-  );
+  // Calculate extracurricular based on achievements
+  const achievementScore = Math.min(100, achievements.length * 10);
+  const categoryBonus = achievements.reduce((acc, ach) => {
+    const category = (ach.category || '').toLowerCase();
+    if (['sports', 'cultural', 'volunteering', 'club'].includes(category)) {
+      return acc + 5;
+    }
+    return acc;
+  }, 0);
+  const extracurricular = clamp(achievementScore + categoryBonus);
 
   const overall = clamp(
     wmean([
@@ -304,11 +325,17 @@ export function transformStudentToProfile(student) {
   // 1. Convert skills → techLevels with default level=1
   const techLevels = {};
   for (const s of student.skills) {
-    techLevels[s.toLowerCase()] = 1; // default baseline skill
+    // Handle both string (legacy) and object (new) formats
+    const skillName = typeof s === 'string' ? s : s.name;
+    if (skillName) {
+      techLevels[skillName.toLowerCase()] = 1; // default baseline skill
+    }
   }
 
   // 2. Convert experiences into evaluator format
   const experiences = student.experience.map((exp) => ({
+    _id: exp._id,
+    type: 'experience',
     title: exp.title,
     description: exp.description,
     technologies: exp.technologies || [],
@@ -324,10 +351,13 @@ export function transformStudentToProfile(student) {
     reviewsDone: 0,
     wonHackathon: false,
     filedPatent: false,
+    llmTags: exp.llmTags || {},
   }));
 
   // 3. Convert projects into evaluator format
   const projectExperiences = student.projects.map((project) => ({
+    _id: project._id,
+    type: 'project',
     title: project.title,
     description: project.description,
     technologies: project.technologies || [],
@@ -343,12 +373,24 @@ export function transformStudentToProfile(student) {
     reviewsDone: 0,
     wonHackathon: false,
     filedPatent: false,
+    llmTags: project.llmTags || {},
+  }));
+
+  // 4. Convert achievements into evaluator format
+  const achievements = (student.achievements || []).map((achievement) => ({
+    _id: achievement._id,
+    title: achievement.title,
+    description: achievement.description,
+    date: achievement.date,
+    category: achievement.category,
+    llmTags: achievement.llmTags || {},
   }));
 
   return {
     userId: String(student._id),
     techLevels,
     experiences: [...experiences, ...projectExperiences],
+    achievements,
     signals: {
       extracurricularScore: 40, // optional default
     },

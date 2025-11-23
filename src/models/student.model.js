@@ -26,7 +26,10 @@ const StudentSchema = new mongoose.Schema({
     about_me:{
     type : String,
   },
-    skills: [{ type: String }],
+    skills: [{
+    name: { type: String },
+    llmTags: { type: Object, default: {} }
+    }],
     projects: [
       {
         title: { type: String, required: true },
@@ -35,6 +38,7 @@ const StudentSchema = new mongoose.Schema({
         link: { type: String },
         startDate: { type: Date },
         endDate: { type: Date },
+        llmTags: { type: Object, default: {} },
       },
     ],
     experience: [ExperienceSchema],
@@ -65,6 +69,7 @@ const StudentSchema = new mongoose.Schema({
         description: { type: String },
         date: { type: Date },
         category: { type: String },
+        llmTags: { type: Object, default: {} },
       },
     ],
 });
